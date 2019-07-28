@@ -17,7 +17,19 @@
 package com.example.android.devbyteviewer.repository
 
 import com.example.android.devbyteviewer.database.VideoDatabase
+import com.example.android.devbyteviewer.network.DevByteNetwork
+import com.example.android.devbyteviewer.network.asDatabaseModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class VideosRepository(private val database: VideoDatabase) {
 
+    suspend fun refreshVideos() {
+        withContext(Dispatchers.IO) {
+            Timber.d("Refresh videos is called")
+            val playlist = DevByteNetwork.devbytes.getPlaylist().await()
+            database.videoDao.insertAll(playlist.asDatabaseModel())
+        }
+    }
 }
